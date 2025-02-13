@@ -1,12 +1,16 @@
 version: "3.8"
 
+# Application Name = COMPOSE_PROJECT_NAME
+name: Example
+
 networks:
   laravel:
     driver: bridge
 
 services:
+  # Laravel Application Service
   app:
-    container_name: laravel_app
+    container_name: ${COMPOSE_PROJECT_NAME}_app
     build:
       context: ./docker/php
       dockerfile: Dockerfile
@@ -16,32 +20,29 @@ services:
       - "9000:9000"
     working_dir: /var/www
     depends_on:
-      db:
-        condition: service_healthy
+      - db
     networks:
       - laravel
 
+  # PostgreSQL Database Service
   db:
     image: postgres
-    container_name: postgres_db
+    container_name: ${COMPOSE_PROJECT_NAME}_db
     volumes:
       - ./docker/postgresql/data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     environment:
-      POSTGRES_DB: todo
+      POSTGRES_DB: ${COMPOSE_PROJECT_NAME}
       POSTGRES_USER: root
       POSTGRES_PASSWORD: password
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U root -d blog"]
-      interval: 5s
-      retries: 5
     networks:
       - laravel
 
+  # Nginx Web Server Service
   nginx:
     image: nginx:alpine
-    container_name: nginx_web
+    container_name: ${COMPOSE_PROJECT_NAME}_nginx
     ports:
       - "8081:80"
     volumes:
@@ -56,14 +57,13 @@ services:
   # pgAdmin Service
   pgadmin:
     image: dpage/pgadmin4
-    container_name: pgadmin_ui
+    container_name: ${COMPOSE_PROJECT_NAME}_pgadmin_ui
     ports:
       - "5050:80"
     environment:
       PGADMIN_DEFAULT_EMAIL: pgadmin@email.com
       PGADMIN_DEFAULT_PASSWORD: password
     depends_on:
-      db:
-        condition: service_healthy
+      - db
     networks:
       - laravel
