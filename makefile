@@ -3,7 +3,10 @@
 default: help
 
 build: ## run docker compose build
-	docker compose build -d
+	docker compose build
+
+rebuild: ## run docker compose build
+	docker compose up -d --force-recreate --build --remove-orphans
 
 ps: ## docker compose ps
 	docker compose ps
@@ -20,6 +23,10 @@ down-volumes: ## docker compose down with volumes
 restart: ## docker compose restart
 	docker compose restart
 
+laravel: ## create laravel project
+	docker compose run app rm -rf .gitkeep
+	docker compose run app composer create-project --prefer-dist laravel/laravel .
+
 composer-install: ## composer install
 	docker compose run app composer install
 
@@ -30,10 +37,10 @@ composer: ## run composer commands
 tinker: ## artisan tinker
 	docker compose run app php artisan tinker
 
-config-clear: ## artisan tinker
+config-clear: ## config clear
 	docker compose run app php artisan config:clear
 
-cache-clear: ## artisan tinker
+cache-clear: ## cache clear
 	docker compose run app php artisan cache:clear
 
 art: ## run artisan command
