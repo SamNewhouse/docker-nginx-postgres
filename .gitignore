@@ -1,0 +1,2 @@
+# Ignore the entire docker/postgresql directory
+docker/postgresql/
