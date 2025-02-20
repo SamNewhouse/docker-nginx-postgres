@@ -5,6 +5,7 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 
 # Add Composer to the PATH
 ENV PATH="$PATH:/usr/local/bin"
+ENV COMPOSER_ALLOW_SUPERUSER=1
 
 # Install required PHP extensions
 RUN docker-php-ext-install pdo pdo_mysql
@@ -21,6 +22,9 @@ RUN apt-get update && apt-get -y install --fix-missing \
 
 # replace shell with bash so we can source files
 RUN rm /bin/sh && ln -s /bin/bash /bin/sh
+
+# Set the working directory
+WORKDIR /var/www
 
 # nvm environment variables
 ENV NVM_DIR /usr/local/nvm
@@ -42,8 +46,6 @@ ENV PATH $NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH
 RUN node -v
 RUN npm -v
 
-# Set the working directory
-WORKDIR /var/www
 
 # Expose the port
 EXPOSE 9000
