@@ -1,4 +1,6 @@
 ## Installation
 
 - Clone this repo
-- Install Laravel inside /src
+- Run `make up` to create docker containers
+- run `make laravel` to create laravel project inside src folder
+- Happy coding
