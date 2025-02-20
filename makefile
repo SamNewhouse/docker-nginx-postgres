@@ -26,6 +26,12 @@ restart: ## docker compose restart
 laravel: ## create laravel project
 	docker compose run app rm -rf .gitkeep
 	docker compose run app composer create-project --prefer-dist laravel/laravel .
+	docker compose run app chown -R 1000:1000 .
+	docker compose run app chmod -R 777 storage database
+
+folder-permissions: ## change permissions for folders
+	docker compose run app chown -R 1000:1000 .
+	docker compose run app chmod -R 777 storage database
 
 composer-install: ## composer install
 	docker compose run app composer install
