@@ -10,14 +10,14 @@ ENV COMPOSER_ALLOW_SUPERUSER=1
 # Install required PHP extensions
 RUN docker-php-ext-install pdo pdo_mysql
 
-# Install necessary packages and libraries in one step
+# Install required PHP extensions
 RUN apt-get update && apt-get -y install --fix-missing \
     apt-utils nano wget dialog vim build-essential git curl \
     libcurl4 libcurl4-openssl-dev zlib1g-dev libzip-dev zip \
-    libbz2-dev locales libmcrypt-dev libicu-dev libonig-dev \
-    libxml2-dev libpq-dev \
-    && docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql \
-    && docker-php-ext-install pdo pdo_mysql pdo_pgsql pgsql \
+    libbz2-dev locales libicu-dev libonig-dev libxml2-dev \
+    libpq-dev libpq5 \
+    && docker-php-ext-configure pgsql \
+    && docker-php-ext-install pdo pdo_pgsql pgsql \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # replace shell with bash so we can source files
