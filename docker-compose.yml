@@ -1,6 +1,6 @@
 version: "3.8"
 
-# Application Name = COMPOSE_PROJECT_NAME
+# Application Name
 name: Example
 
 networks:
@@ -19,6 +19,16 @@ services:
     ports:
       - "9000:9000"
     working_dir: /var/www
+    environment:
+      APP_ENV: local
+      APP_DEBUG: true
+      APP_KEY: ${APP_KEY}
+      DB_CONNECTION: pgsql
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_DATABASE: ${COMPOSE_PROJECT_NAME}
+      DB_USERNAME: root
+      DB_PASSWORD: password
     depends_on:
       - db
     networks:
@@ -26,8 +36,9 @@ services:
 
   # PostgreSQL Database Service
   db:
-    image: postgres
+    image: postgres:15
     container_name: ${COMPOSE_PROJECT_NAME}_db
+    restart: unless-stopped
     volumes:
       - ./docker/postgresql/data:/var/lib/postgresql/data
     ports:

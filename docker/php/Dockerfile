@@ -1,54 +1,48 @@
-FROM php:8.2.27-fpm
+# Use official PHP with FPM and PostgreSQL support
+FROM php:8.2-fpm
 
-# Install Composer globally
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    nano \
+    unzip \
+    git \
+    libpq-dev \
+    libzip-dev \
+    libpng-dev \
+    postgresql-client \
+    bash \
+    && docker-php-ext-install \
+    pdo \
+    pdo_pgsql \
+    pgsql \
+    zip \
+    gd
 
-# Add Composer to the PATH
-ENV PATH="$PATH:/usr/local/bin"
-ENV COMPOSER_ALLOW_SUPERUSER=1
+# Install Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Install required PHP extensions
-RUN docker-php-ext-install pdo pdo_mysql
+# Install NVM (Node Version Manager) and Node.js
+ENV NVM_DIR /root/.nvm
+RUN curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.4/install.sh | bash && \
+    . "$NVM_DIR/nvm.sh" && \
+    nvm install 20 && \
+    nvm use 20 && \
+    nvm alias default 20 && \
+    npm install -g npm
 
-# Install required PHP extensions
-RUN apt-get update && apt-get -y install --fix-missing \
-    apt-utils nano wget dialog vim build-essential git curl \
-    libcurl4 libcurl4-openssl-dev zlib1g-dev libzip-dev zip \
-    libbz2-dev locales libicu-dev libonig-dev libxml2-dev \
-    libpq-dev libpq5 \
-    && docker-php-ext-configure pgsql \
-    && docker-php-ext-install pdo pdo_pgsql pgsql \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+# Ensure NVM and Node.js are available for all users
+ENV NODE_VERSION 20
+ENV PATH "$NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH"
 
-# replace shell with bash so we can source files
-RUN rm /bin/sh && ln -s /bin/bash /bin/sh
-
-# Set the working directory
+# Set working directory
 WORKDIR /var/www
 
-# nvm environment variables
-ENV NVM_DIR /usr/local/nvm
-ENV NODE_VERSION 20.9.0
+# Set permissions
+RUN chown -R www-data:www-data /var/www
 
-# Create NVM directory and install nvm, node, and npm
-RUN mkdir -p $NVM_DIR && \
-    curl --silent -o- https://raw.githubusercontent.com/creationix/nvm/v0.40.1/install.sh | bash && \
-    source $NVM_DIR/nvm.sh && \
-    nvm install $NODE_VERSION && \
-    nvm alias default $NODE_VERSION && \
-    nvm use default
-
-# Add node and npm to path so the commands are available
-ENV NODE_PATH $NVM_DIR/v$NODE_VERSION/lib/node_modules
-ENV PATH $NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH
-
-# Confirm installation
-RUN node -v
-RUN npm -v
-
-
-# Expose the port
+# Expose port 9000 for PHP-FPM
 EXPOSE 9000
 
-# Define the entry point
+# Start PHP-FPM
 CMD ["php-fpm"]
